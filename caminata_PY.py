@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Fri Apr  5 17:18:45 2019
@@ -16,23 +17,25 @@ rcParams['figure.figsize'] = 15, 6
 np.random.seed(0)
 muestra=np.random.normal(0, 1, 200)
 print(muestra)
+len(muestra)
 
 ### Función para las sumas acumualdas ###
-muestra
 
 def caminata(t, muestra):  
-    suma= []
-    for i in range(0,t+1):
+    suma= [0]
+    for i in range(0,t):
         nuevo=sum(muestra[0:i+1])
         suma.append(nuevo)
         print(suma)    
     return(suma)  
 datos=caminata(200,muestra)
+len(datos)
+#sum(muestra)
 
 ### Gráfico de la serie de tiempo ###
-t = np.arange(1, 201, 1)
-datosn=datos[0:200]
-Caminata=pd.Series(datosn,index=t)
+t = np.arange(0, 201, 1)
+len(t)
+Caminata=pd.Series(datos,index=t)
 Caminata
 plt.plot(Caminata)
 plt.ylabel('St')
