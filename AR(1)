@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr 14 15:32:02 2019
+
+@author: Viviana
+"""
+
+import pandas as pd
+import numpy as np
+from scipy import stats 
+import matplotlib.pylab as plt
+from matplotlib.pylab import rcParams
+rcParams['figure.figsize'] = 15, 6
+import statistics as stats
+from statsmodels.tsa.tsatools import lagmat, lagmat2ds, add_trend
+
+
+
+
+def AR(k, h, phi):
+    ### Generación de la muestra
+    np.random.seed(4)
+    muestra=np.random.normal(0,1,k)
+    #print(muestra)
+    #len(muestra)
+    
+    ### asignación de índices ###
+    ind=np.arange(1,k+1,1)
+    len(ind)
+    autor=pd.Series(muestra,index=ind)
+    #print(autor)
+    
+    ### Ciclo para calcular iterativamente X_t=phi*X_t-1+ Z_t
+    xt=[0]                       # Porque X_0=0
+    for i in range (1,k+1):      
+        x=phi*xt[i-h]+autor[i]   #X_t=phi*X_t-1+ Z_t
+        xt.append(x)
+    #print(xt)
+    #len(xt)
+    
+    ### Gráfico 
+    t=np.arange(0,k+1,1)
+    AR=pd.Series(xt,index=t)
+    plt.plot(AR)
+    plt.ylabel('Xt')
+    plt.xlabel('t')
+    plt.title('AR(1)') 
+    return(xt) 
+    
+xt=AR(10000,1,0.5)
+len(xt)
+
+def acf(x, h):
+    cov=[]
+    for i in range(0,len(x)-abs(h)):
+        a=(x[i+abs(h)]-stats.mean(x))*(x[i]-stats.mean(x))
+        cov.append(a)
+    gamma=sum(cov)
+    return(gamma)
+acf(xt, 1)
+plt.plot(ac)
+plt.ylabel('Correlación')
+plt.xlabel('Rezago')
+    
