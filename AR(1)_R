@@ -1,0 +1,47 @@
+##############################################################################
+######################### Tarea 2: Proceso AR(1) #############################
+##############################################################################
+
+# Generaci�n de la muestra:
+set.seed(1)
+muestra=rnorm(1000,0,1)
+
+AR<-function(muestra, phi){
+      x=NULL
+      x[1]=0
+      for(i in 2:length(muestra)){ 
+        x[i]=phi*x[i-1]+muestra[i]
+      }
+    return(x)
+}
+serie=AR(muestra, 0.5) 
+length(serie); View(serie)
+t=seq(1, length(serie), by=1)
+plot(t,serie, type="l",xlab="t", ylab=expression(X_t), main="Proceso AR(1)")
+
+### Funci�n de acutocovarianza:
+
+#Funci�n de autocovarianza para un valor de rezago
+auto_cov<-function(x, h){
+          mult=NULL
+          media=mean(x)
+          n=length(x)-h
+          for(i in 1:n){
+            mult[i]=(x[i+h]-media)*(x[i]-media)
+          }
+          gamma=sum(mult)/length(x)
+          return(gamma)  
+}
+
+#Funci�n para generar el gr�fico y datos de autocovarianza para distintos rezagos
+AC<-function(nlags){
+    cor=NULL
+    for(j in 0:nlags){
+      cor[j+1]=auto_cov(serie, j)
+                    }
+    h=seq(0, nlags, by=1)
+    plot(h,cor, xlab="h", ylab="Correlaci�n", main="Funci�n de acutocovarianza muestral", pch=16)
+    lines(h, cor)
+    return(cor)
+    }
+AC(50)
