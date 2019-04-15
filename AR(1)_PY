@@ -14,9 +14,6 @@ rcParams['figure.figsize'] = 15, 6
 import statistics as stats
 from statsmodels.tsa.tsatools import lagmat, lagmat2ds, add_trend
 
-
-
-
 def AR(k, h, phi):
     ### Generación de la muestra
     np.random.seed(4)
@@ -47,18 +44,36 @@ def AR(k, h, phi):
     plt.title('AR(1)') 
     return(xt) 
     
-xt=AR(10000,1,0.5)
+xt=AR(100,1,0.5)
 len(xt)
 
-def acf(x, h):
-    cov=[]
-    for i in range(0,len(x)-abs(h)):
-        a=(x[i+abs(h)]-stats.mean(x))*(x[i]-stats.mean(x))
-        cov.append(a)
-    gamma=sum(cov)
-    return(gamma)
-acf(xt, 1)
-plt.plot(ac)
+
+def cov_auto_samp(X,delta):
+    N = len(xt)
+    Xs = np.average(xt)
+    autoCov = 0.0
+    times = 0.0
+    for i in np.arange(0, N-delta):
+        autoCov += (xt[i+delta]-Xs)*(xt[i]-Xs)
+        times +=1
+    return autoCov/times
+cov_auto_samp(xt,1)
+
+### Función de autocovarianza
+funcov=[]
+len(xt)
+numh=50
+for i in range (0,numh):
+    x=cov_auto_samp(xt,i)
+    funcov.append(x)
+print(funcov)
+len(funcov)
+h=np.arange(0,numh,1)
+AC=pd.Series(funcov,index=h)
+plt.plot(AC)
 plt.ylabel('Correlación')
 plt.xlabel('Rezago')
+plt.title('Función de Autocovarianza muestral') 
+print(AC)
+
     
