@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May  7 12:28:41 2019
+
+@author: Viviana
+"""
+
+import pandas as pd
+from pandas import Series
+import numpy as np
+import scipy as sp
+import matplotlib.pylab as plt
+from matplotlib.pylab import rcParams
+rcParams['figure.figsize'] = 15, 6
+from pydataset import data
+data('AirPassengers')
+#n=tamaño
+def AR(n, h, phi):
+    ### Generación de la muestra
+    #np.random.seed(4)
+    muestra=np.random.normal(0,1,n)
+    #print(muestra)
+    #len(muestra)
+    
+    ### asignación de índices ###
+    ind=np.arange(1,n+1,1)
+    len(ind)
+    autor=pd.Series(muestra,index=ind)
+    #print(autor)
+    
+    ### Ciclo para calcular iterativamente X_t=phi*X_t-1+ Z_t
+    xt=[0]                       # Porque X_0=0
+    for i in range (1,n+1):      
+        x=phi*xt[i-h]+autor[i]   #X_t=phi*X_t-1+ Z_t
+        xt.append(x)
+    #print(xt)
+    #len(xt)
+    
+    ### Gráfico 
+    t=np.arange(0,n+1,1)
+    AR=pd.Series(xt,index=t)
+    plt.plot(AR)
+    plt.ylabel('Xt')
+    plt.xlabel('t')
+    plt.title('AR(1)') 
+    return(xt) 
+xt=[0]
+for i in range (1, 10):    
+    a=AR(100,1,0.8)
+    xt.append(a)
+    
+xt    
+len(xt)
+ acf(a,nlags=50,unbiased=False)
+    plot_acf(a,lags=50,unbiased=False, alpha=0.05)
