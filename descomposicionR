@@ -1,0 +1,54 @@
+####Vamos a hacer un anÃ¡lisis Inicial a la serie de pasajeros#####
+####Un anÃ¡lisis similar deberÃ¡ hacerse para las series ISE y ACC de la
+####Base de datos Base_Accidentes.xlsx
+
+######Base de Pasajeros###
+data("AirPassengers")
+plot(AirPassengers)
+#####TransformaciÃ³n Box-Cox
+library(lattice);library(leaps);library(ltsa);library(bestglm)
+library(FitAR)
+library(forecast)
+forecast::BoxCox.lambda(AirPassengers, method = "guerrero", lower = 0, upper = 2)  
+##method="loglik"
+FitAR::BoxCox(AirPassengers) # Da el intervalo de confianza para lambda
+#air.arima<-arima(AirPassengers, c(0,1,1), seasonal=list(order=c(0,1,1), period=12))
+#FitAR::BoxCox(air.arima) #lambda=0.14 igual que en python
+lAirPass=log(AirPassengers)
+par(mfrow=c(1,1))
+plot(AirPassengers)
+plot(lAirPass)
+
+
+######DescomposiciÃ³n usando promedios MÃ³viles
+deslAirPass=decompose(lAirPass)
+plot(deslAirPass)
+deslAirPass
+
+
+####DescompoisiciÃ³n usando suavizamiento exponencial
+HWAP=HoltWinters(lAirPass,seasonal="additive")
+plot(HWAP)
+ajustados=fitted(HWAP)
+plot(ajustados)
+ajustados
+plot(AirPassengers)
+resid=lAirPass-ajustados[,2]-ajustados[,3]-ajustados[,4]
+plot(resid)
+a=ajustados[,2]+ajustados[,3]+ajustados[,4]
+lAirPass-ajustados[,1]
+a-ajustados[,1]
+####DiferenciaciÃ³n
+ldAirPass=diff(lAirPass,lag=1,differences = 1)###Differences indica nÃºmero de diferencia
+plot(ldAirPass)
+
+
+#PM: wt=mt=(2q+1)^-1*sum -q a q xt-j
+#st=wk-d^-1*sumj=1 a d wj ; k=1,..,d; wk=x_k+jd-mest_k+jd prom desv
+#SE: mt=alpha*xt+(1-alpha)*mt-1; m1=xq ; alpha se halla minimizando sum t=2 a n xt-mt-1
+#Triple:actualiza estimaciones de la media ajustada: estacionalidad(nivel), pendiente(cambio de nivel de un per a otro)
+#DF  mt=sum j=0 a k aj*t^j ; ai se obtiene minimizando sum t=1 a n (xt-mt)^2
+#    nabla(mt)=mt-mt-1; nabla^2(mt)=(1-B)*(1-B)mt
+#    entonces nabla^k(mt)=k!*a_k+ nabla^k(Y_t)
+#st:  nabla_d(xt)=(1-B^d)xt entonces aplicar nabla_d al modelo aditivo y luego quitar la tendencia con nabla^k
+
