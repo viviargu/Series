@@ -12,7 +12,7 @@ import scipy as sp
 import matplotlib.pylab as plt
 from matplotlib.pylab import rcParams
 rcParams['figure.figsize'] = 15, 6
-from pydataset import data
+#from pydataset import data
 from statsmodels.tsa.arima_process import arma_acf
 from statsmodels.tsa.arima_process import ArmaProcess
 import statsmodels as sm
@@ -68,11 +68,13 @@ print(result.seasonal)
 print(result.resid)
 print(result.observed)
 result.plot()
-pyplot.show()
-residuos=result.resid
+#pyplot.show()
+residuos=pd.Series(result.resid[7:138])
+plt.plot(residuos)
+#print(residuos.dtypes)
+acf(residuos, nlags=30, unbiased=False, missing='drop', alpha=0.05)
+plot_acf(residuos, lags=30, unbiased=False)
 
-acf(residuos, nlags=30, unbiased=False, missing='drop')
-plot_acf(result.resid, nlags=10, unbiased=False)
 ####Holt-Winters
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 print(ts)
@@ -94,3 +96,6 @@ plt.ylabel('sesaon')
 plt.subplot(5, 1, 5)
 plt.plot(fit1.resid)
 plt.ylabel('resid') 
+resid=fit1.resid
+acf(resid, nlags=30, unbiased=False, missing='drop', alpha=0.05)
+plot_acf(resid, lags=30, unbiased=False)
