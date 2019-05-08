@@ -68,7 +68,7 @@ print(result.resid)
 print(result.observed)
 result.plot()
 #pyplot.show()
-residuos=pd.Series(result.resid[7:138])
+residuos=pd.Series(result.resid[6:138])
 plt.plot(residuos)
 #print(residuos.dtypes)
 acf(residuos, nlags=30, unbiased=False, missing='drop', alpha=0.05)
@@ -113,7 +113,8 @@ print(data2.sheet_names)
 #Data Frame de la hoja "Datos"
 data2=data2.parse('DATA2005')
 print(data2)
-
+#ISE
+#Indexamos y determinamos la frecuencia (mensual)
 ind = pd.date_range(start='1/1/2005', end='8/1/2018', freq='M')
 accidentes2 = data2.set_index(ind)
 ise = pd.Series(accidentes2['ISE'],index=ind)
@@ -126,7 +127,7 @@ plt.plot(serielogise)
 
 #PM
 result2 = seasonal_decompose(serielogise, model='additive')
-resid2=pd.Series(result2.resid[7:157])
+resid2=pd.Series(result2.resid[6:157])
 acf(resid2, nlags=30, unbiased=False)
 plot_acf(resid2, lags=30, unbiased=False)
 
@@ -134,3 +135,46 @@ plot_acf(resid2, lags=30, unbiased=False)
 fit2 = ExponentialSmoothing(ise, seasonal_periods=12, trend='add', seasonal='add').fit(use_boxcox=True)
 acf(fit2.resid, nlags=30, unbiased=False, alpha=0.05)
 plot_acf(fit2.resid, lags=30, unbiased=False)
+
+#ACC
+#Indexamos y determinamos la frecuencia (mensual)
+ind = pd.date_range(start='1/1/2005', end='8/1/2018', freq='M')
+accidentes2 = data2.set_index(ind)
+acc = pd.Series(accidentes2['ACC'],index=ind)
+print(acc.dtypes)
+#BC
+sp.stats.boxcox(acc,alpha=0.05)     
+tracc=sp.stats.boxcox(acc,lmbda=3.3578573249357277) 
+#tra=(acc**(3.3578573249357277)-1)/3.3578573249357277 #Fórmula 
+serietracc=pd.Series(tracc, index=ind)  
+plt.plot(serietracc) 
+
+#PM
+result3 = seasonal_decompose(serietracc, model='additive')
+resid3=pd.Series(result3.resid[6:157])
+acf(resid3, nlags=30, unbiased=False)
+plot_acf(resid3, lags=30, unbiased=False)
+
+#SE
+fit3 = ExponentialSmoothing(acc, seasonal_periods=12, trend='add', seasonal='add').fit(use_boxcox=True)
+acf(fit3.resid, nlags=30, unbiased=False, alpha=0.05)
+plot_acf(fit3.resid, lags=30, unbiased=False)
+
+
+# IID: gamma(h)= sigma^2 si h=0 y 0 e.o.c
+#Cam.Ale: E(st)=0; gamma(0)=var(st)=t*sigma^2
+#Estacionario ent |ga(h)|<=ga(0) |E((x_t+h-mu)(xt-mu))|<= sqrt(E((xt+h-mu)^2)sqrt()=var(xt)=ga(0)
+#MA(1) depende de ruidos pasados y presentes: xt=sum j=0 a +inf sij*Zt-j
+#MA(1), ga(H)=sig^2*(1-theta^2) si h=0, sig^2*theta si h=+-1, 0 e.o.c
+#sum yj*zt-j converge con prob 1 si sum E(|yj*zt-j|) converge (T.conveg mon)
+    #jensen: E^2(|x|)<=E(|x|^2)=sig^2 ent E(|x|)<=sig.
+#Si sum si^2_j <inf ent. sum si_j*Zt-j conv el M.C al mismo lim
+#AR(1): ga(h)= phi^h *ga(0) ; ga(0)=sig^2/(1-\phi^2); rho(h)=phi^|h|
+    #Soluciones sum j= 0 a k phi^j*zt-j ; -sum 1 a inf phi^-j*zt+j depende de ruidos futuros
+    #Bien definido: que la sum de coef es abs sumable y que la sum orig converge en prob 1
+    #Encontrar solu: phi(B)^-1*phi(B)=1=1B^0+0^Bj y phi(B)^-1=pi(B)=sum 0 a inf de pij*(B)^j ; phi(B)=1-phi*B
+    #Llegar a que pi(B)=sum 0 a inf phi^j*B^j y si |phi|>1 pi(B)=sum 1 a inf phi^-j*B^j
+#ARMA(1,1)=xt=phi*xt-1+theta*Zt-1+Zt
+    #Sol= Zt+(phi+theta)*sum j= 1 a inf phi^j-1*Zt-j (presentes, pasados)
+    #Si |phi|>1 sol= -theta*phi^-1*zt-(tehta+phi)*sum 1 a inf phi^-j*Zt+j
+    #ga(h)=sum o a inf sij*sij+h*sig^2 con sij= 1 si j=0 y (phi+theta)*phi^j-1 si j>=1
