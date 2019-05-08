@@ -32,7 +32,6 @@ print('\n Data Types:')
 print(data.dtypes)
 
 ######Convertir el conjunto de datos en una serie de Tiempo#####
-
 con=data['Month']
 data['Month']=pd.to_datetime(data['Month']) # Extraer los las fechas de los datos
 ##data.set_index('Month', inplace=True)
@@ -99,3 +98,39 @@ plt.ylabel('resid')
 resid=fit1.resid
 acf(resid, nlags=30, unbiased=False, missing='drop', alpha=0.05)
 plot_acf(resid, lags=30, unbiased=False)
+
+#DIF
+diff1logAirPass=logAirPass.diff(periods=1)####Diferencia Ordinaria (remueve la componente de tendencia)
+plt.plot(diff1logAirPass)
+diffs1diff1logAirPass=diff1logAirPass.diff(periods=12) ###Diferencia Estacional (remueve la componente estacional)
+print(diffs1diff1logAirPass)
+plt.plot(diffs1diff1logAirPass)
+
+############################################ Punto 2 ############################################
+
+data2 = pd.ExcelFile('Base_Accidentes.xlsx')
+print(data2.sheet_names)
+#Data Frame de la hoja "Datos"
+data2=data2.parse('DATA2005')
+print(data2)
+
+ind = pd.date_range(start='1/1/2005', end='8/1/2018', freq='M')
+accidentes2 = data2.set_index(ind)
+ise = pd.Series(accidentes2['ISE'],index=ind)
+print(ise.dtypes)
+#BC
+sp.stats.boxcox(ise,alpha=0.05)     
+logise=sp.stats.boxcox(ise,lmbda=0) 
+serielogise=pd.Series(logise, index=ind)  
+plt.plot(serielogise) 
+
+#PM
+result2 = seasonal_decompose(serielogise, model='additive')
+resid2=pd.Series(result2.resid[7:157])
+acf(resid2, nlags=30, unbiased=False)
+plot_acf(resid2, lags=30, unbiased=False)
+
+#SE
+fit2 = ExponentialSmoothing(ise, seasonal_periods=12, trend='add', seasonal='add').fit(use_boxcox=True)
+acf(fit2.resid, nlags=30, unbiased=False, alpha=0.05)
+plot_acf(fit2.resid, lags=30, unbiased=False)
