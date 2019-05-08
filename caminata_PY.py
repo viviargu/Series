@@ -41,3 +41,4 @@ plt.plot(Caminata)
 plt.ylabel('St')
 plt.xlabel('t')
 plt.title('Caminata Aleatoria') 
+#E(st)=0; gamma(0)=var(st)=t*sigma^2
