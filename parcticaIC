@@ -1,0 +1,70 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May  7 12:52:20 2019
+
+@author: Viviana
+"""
+
+import numpy as np
+import pandas as pd
+import math 
+import matplotlib.pylab as plt
+from statsmodels.tsa.arima_process import arma_acf
+from statsmodels.tsa.arima_process import ArmaProcess
+import statsmodels as sm
+import statsmodels.api as smapi
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.tsa.stattools import acf
+from statsmodels.graphics.tsaplots import plot_pacf
+from statsmodels.tsa.stattools import pacf
+from statsmodels.tsa.stattools import acovf
+from statsmodels.tsa.arima_model import ARIMA
+n=200 #Tamaño de la serie
+l=50 #condiciones iniciales
+theta=0.5 
+phi=0.5
+sigma=2
+
+####Simulación IID####
+serieIID=pd.Series(np.random.normal(0, 2, 200))
+print(serieIID.dtypes)
+plt.plot(serieIID)
+acf(serieIID,nlags=50,unbiased=False)
+plot_acf(serieIID,lags=50,unbiased=False) #Con bandas de MA(q)
+from pandas.plotting import autocorrelation_plot
+autocorrelation_plot(serieIID) #Con bandas del intervalo
+#plt.show()
+
+#####Simulación MA(1)#####
+ruido=np.random.normal(0, sigma, n+l)
+MA1aux=np.zeros(n+l)
+for t in range(1,n+l):
+    MA1aux[t]=theta*ruido[t-1]+ruido[t]
+
+MA1=pd.Series(MA1aux[(l-1):(n+l-1)])
+plt.plot(MA1)
+
+acf(MA1,nlags=50,unbiased=False)
+x=plot_acf(MA1,lags=50,unbiased=False, alpha=0.05) #Con bandas MA(1)
+
+####Simulación ARMA
+ar=np.array([1,-phi]) ####Se debe cambiar de signo los coeficientes de la parte autoregresiva.
+ma=np.array([1, theta])
+
+np.random.seed(186)
+Tlength=100
+sigma=1
+simul = sm.tsa.arima_process.arma_generate_sample(ar=ar,ma=ma,nsample=Tlength,sigma=1,distrvs=np.random.randn) 
+plt.plot(simul)
+acf(simul,nlags=50,unbiased=False)
+plot_acf(simul,lags=50,unbiased=False)
+
+####ACF Teórico 
+teor = arma_acf(ar,ma,20)
+print(teor)
+#### Con función ArmaProcess
+ARMA=ArmaProcess(ar,ma)
+ARMA.acf(5)
+
+#AR(1) IC= xbar+- 1.96*sqrt(n)*sigma/(1-phi)
+#rhoest~N(rho, W/n)
