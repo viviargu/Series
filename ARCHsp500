@@ -1,0 +1,42 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jul  5 13:34:34 2019
+
+@author: Viviana
+"""
+
+from arch import arch_model
+
+from pandas_datareader import DataReader
+import numpy as np
+import statsmodels.api as smapi
+import matplotlib.pylab as plt
+import pandas as pd
+import pmdarima as pm
+from statsmodels.stats.diagnostic import het_arch
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_pacf
+from statsmodels.tsa.arima_model import ARIMA
+from matplotlib.pylab import rcParams
+
+sp5=pd.read_csv('C:/Users/Viviana/Desktop/Materias/Series de tiempo/Corte 3/SP500.txt', delimiter=r"\s+", header=None)
+plt.plot(sp5)
+acf_sp5=plot_acf(sp5, lags=30)
+pacf_sp5=plot_pacf(sp5, lags=30)
+acf_sp52=plot_acf(sp5**2, lags=30)
+pacf_sp52=plot_pacf(sp5**2, lags=30)
+modelo_automatico=pm.auto_arima(sp5, start_p=0,start_q=0, max_p=3, max_q=5, d=0, D=0, seasonal=False)
+modelo_automatico.summary()
+modelo= smapi.tsa.statespace.SARIMAX(sp5, trend='c', order=(0,0,1)) ####Ajuste de un MA(1)
+results=modelo.fit()
+residuos=results.resid
+
+########Engle’s Test for Autoregressive Conditional Heteroscedasticity (ARCH)
+het_arch(residuos) #returns: (Lagrange statistic, pval for lagrange statistic test, fstatistic for F test, pvalue for F test)
+#Como LM p-val esmenor a cualquier alpha usual se rechaza la hipótesis nula (H0: No heterocedasticidad, H1: Heterocedasticidad) 
+
+res2=residuos**2
+acf_res2=plot_acf(res2, lags=30)
+pacf_res2=plot_pacf(res2, lags=30)
+
+#Como el pacf tiene rezago 3 significativo, ajustamos un GARCH(3,0)
